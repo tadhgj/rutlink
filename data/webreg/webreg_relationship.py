@@ -222,7 +222,12 @@ def create_d3():
         d3_obj['nodes'].append({
             'id': course['id'],
             'name': course['name'],
-            'prereq_string': course['prereq_string']
+            'prereq_string': course['prereq_string'],
+            # split courseid by : and get 2nd element
+            'courseType': course['id'].split(":")[1],
+            'prereqSize': len(course['prereqs']),
+            'isPrereqForSize': len(course['isPrereqFor'])
+
         })
 
         for prereq in course['prereqs']:

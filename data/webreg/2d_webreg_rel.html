@@ -17,14 +17,14 @@
     <script type="importmap">{ "imports": { "three": "https://unpkg.com/three/build/three.module.js" }}</script>
     <script type="text/jsx">
 
-        let globalList = null;
         let nodeList = null;
 
 
 
 
-        const { useRef, useEffect, useCallback } = React;
+        const { useRef, useState, useEffect, useCallback } = React;
 
+        let globalList = null;
         // use ref
         
         
@@ -35,14 +35,21 @@
 
         // const extraRenderers = [new CSS2DRenderer()];
 
-      fetch('d3_webreg.json').then(res => res.json()).then(data => {
+      fetch('d3_webreg.json').then(res => res.json()).then(jdata => {
 
-        console.log(data);
+        console.log(jdata);
 
-        const FocusGraph3D = React.forwardRef((props, ref) => {
+        const FocusGraph3D = (idata) => {
+
+            // const [data, setData] = useState({ nodes: [{ id: 0 }], links: [] });
+
+            console.log("initialNodes: ", idata.initialNodes)
+
+            const [data, setData] = useState(idata.initialNodes);
             const fgRef = useRef();
-    
-            const handleClick = useCallback(node => {
+
+            // this handleClick spins around a node
+            const focusOnNode = useCallback(node => {
               // Aim at node from outside it
               const distance = 100;
               const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
@@ -54,40 +61,50 @@
               );
             }, [fgRef]);
 
-            // Store focusOnNode in the ref
-            //useEffect(() => {
-//                focusOnNodeRef.current = focusOnNode;
- //           }, [focusOnNode]);
+            // find (unique) node by id
+            const findNode = useCallback(id => {
+                return data.nodes.find(node => node.id === id);
+            }, [data.nodes]);
 
-            function focusOnNode(id) {
-                const node = fgRef.current.graphData().nodes.find(node => node.id === id);
-                handleClick(node);
-            }
+            // focus on node by id
+            const focusOnNodeByID = useCallback(id => {
+                const node = findNode(id);
+                if (node) {
+                    focusOnNod(node);
+                }
+            }, [findNode, handleClick]);
 
-            React.useImperativeHandle(ref, () => ({
-                focusOnNode
-            }));
+            const handleClick = useCallback(node => {
+                // Focus on node
+                focusOnNode(node);
+            }, [focusOnNode]);
 
-    
+
             return <ForceGraph3D
 
-                // access data outside
-                ref={fgRef}
-
+                // set data
                 graphData={data}
 
+                // share data
+                ref = {fgRef}
+
+                // customize nodes:
                 nodeLabel="name"
 
-                nodeAutoColorBy="group"
+                // doesn't work
+                nodeAutoColorBy="courseType"
 
                 // connecting lines
                 linkDirectionalArrowLength={3.5}
                 linkDirectionalArrowRelPos={1}
 
+                // stop laggy node dragging
+                enableNodeDrag={false}
 
+                // handle click events...
                 onNodeClick={handleClick}
             />;
-        });
+        };
 
 
         const Wrapper = () => {
@@ -116,6 +133,8 @@
                 }
             }, [searchValue]);
 
+            console.log("input data: ", jdata)
+
             return (
                 <>
                 <div>
@@ -124,8 +143,8 @@
                     <button type="button" onClick={searchNode}>Search</button>
                 </div>
 
-                <FocusGraph3D 
-                    ref = {focusGraphRef}
+                <FocusGraph3D
+                    initialNodes={jdata}
                 />
 
             </>
