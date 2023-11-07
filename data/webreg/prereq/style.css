@@ -1,0 +1,23 @@
+.course {
+    border: 1px solid;
+    padding:5px;
+}
+
+.course-id {
+    color:#555;
+}
+
+.course-name {
+    /* bold */
+    font-weight: bold;
+}
+.course-prereqForListClickable::before {
+    content: "Is prereq for: ";
+}
+.course-prereqListClickable::before {
+    content: "Prerequisites: ";
+}
+
+.course-prereqStr {
+    font-size:12px;
+}

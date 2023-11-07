@@ -1,0 +1,29 @@
+{
+  "name": "rutlink-web",
+  "version": "1.0.0",
+  "description": "all in one rutgers web interface",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tadhgj/rutlink.git"
+  },
+  "author": "Tadhg J",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tadhgj/rutlink/issues"
+  },
+  "homepage": "https://github.com/tadhgj/rutlink#readme",
+  "dependencies": {
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "eslint": "^8.51.0",
+    "eslint-plugin-react": "^7.33.2",
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
+  }
+}

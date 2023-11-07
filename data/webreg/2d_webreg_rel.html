@@ -1,0 +1,211 @@
+<head>
+    <style> body { margin: 0; } </style>
+  
+    <script src="//unpkg.com/react/umd/react.production.min.js"></script>
+    <script src="//unpkg.com/react-dom/umd/react-dom.production.min.js"></script>
+    <script src="//unpkg.com/@babel/standalone"></script>
+  
+    <script src="//unpkg.com/react-force-graph-2d"></script>
+    <script src="//unpkg.com/react-force-graph-3d"></script>
+
+    <!--<script src="../../src/packages/react-force-graph-2d/dist/react-force-graph-2d.js"></script>-->
+  </head>
+  
+  <body>
+    <div id="graph"></div>
+  
+    <script type="importmap">{ "imports": { "three": "https://unpkg.com/three/build/three.module.js" }}</script>
+    <script type="text/jsx">
+
+        let globalList = null;
+        let nodeList = null;
+
+
+
+
+        const { useRef, useEffect, useCallback } = React;
+
+        // use ref
+        
+        
+
+
+
+        // import { CSS2DRenderer, CSS2DObject } from '//unpkg.com/three/examples/jsm/renderers/CSS2DRenderer.js';
+
+        // const extraRenderers = [new CSS2DRenderer()];
+
+      fetch('d3_webreg.json').then(res => res.json()).then(data => {
+
+        console.log(data);
+
+        const FocusGraph3D = React.forwardRef((props, ref) => {
+            const fgRef = useRef();
+    
+            const handleClick = useCallback(node => {
+              // Aim at node from outside it
+              const distance = 100;
+              const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+    
+              fgRef.current.cameraPosition(
+                { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
+                node, // lookAt ({ x, y, z })
+                3000  // ms transition duration
+              );
+            }, [fgRef]);
+
+            // Store focusOnNode in the ref
+            //useEffect(() => {
+//                focusOnNodeRef.current = focusOnNode;
+ //           }, [focusOnNode]);
+
+            function focusOnNode(id) {
+                const node = fgRef.current.graphData().nodes.find(node => node.id === id);
+                handleClick(node);
+            }
+
+            React.useImperativeHandle(ref, () => ({
+                focusOnNode
+            }));
+
+    
+            return <ForceGraph3D
+
+                // access data outside
+                ref={fgRef}
+
+                graphData={data}
+
+                nodeLabel="name"
+
+                nodeAutoColorBy="group"
+
+                // connecting lines
+                linkDirectionalArrowLength={3.5}
+                linkDirectionalArrowRelPos={1}
+
+
+                onNodeClick={handleClick}
+            />;
+        });
+
+
+        const Wrapper = () => {
+
+            const focusGraphRef = useRef();
+            const [searchValue, setSearchValue] = React.useState('');
+
+            // const searchNode = useCallback(() => {
+                // const id = document.getElementById("search").value;
+                // console.log(id)
+
+                //focusOnNodeRef.current(id);
+
+            // }, [focusOnNodeRef]);
+
+            // const searchNode = useCallback(() => {
+                // console.log(searchValue);
+                // focusOnNodeRef.current(searchValue);
+
+
+            // }, [searchValue, focusOnNodeRef]);
+
+            const searchNode = useCallback(() => {
+                if (focusGraphRef.current) {
+                    focusGraphRef.current.focusOnNode(searchValue);
+                }
+            }, [searchValue]);
+
+            return (
+                <>
+                <div>
+                    <input type="text" id="search" name="search" value={searchValue} onChange={e => setSearchValue(e.target.value)} placeholder="Search for a node..."></input>
+
+                    <button type="button" onClick={searchNode}>Search</button>
+                </div>
+
+                <FocusGraph3D 
+                    ref = {focusGraphRef}
+                />
+
+            </>
+            );
+        }
+
+
+
+
+
+
+
+
+        ReactDOM.render(
+
+            <Wrapper />
+            ,
+            document.getElementById('graph')
+        );
+      });
+    </script>
+  </body>
+
+  <!-- Rutgers Discrete 2 -->
+<!-- 
+                <ForceGraph3D
+
+
+                    // data
+                    graphData={data}
+
+                    // customize line width
+                    // linkWidth={node => node.value}
+
+                    // set directional arrows
+                    linkDirectionalArrowLength={3.5}
+                    linkDirectionalArrowRelPos={1}
+                    // linkCurvature={0.25}
+
+
+                    // new
+                    // extraRenderers={extraRenderers}
+                    // nodeThreeObject={node => {
+                        // const nodeEl = document.createElement('div');
+                        // nodeEl.textContent = node.id+'\n'+node.name;
+                        // nodeEl.style.color = '#000000';
+                        // nodeEl.style.background = 'rgba(255,255,255,0.8)';
+                        // nodeEl.style.fontSize = '10px';
+                        // nodeEl.className = 'node-label';
+                        // return new CSS2DObject(nodeEl);
+                    // }}
+                    // nodeThreeObjectExtend={true}
+
+                    // make name only appear on hover of node:
+
+
+                    // OLD
+                    nodeCanvasObject={(node, ctx, globalScale) => {
+                    const label = node.name;
+                    const fontSize = 12/globalScale;
+                    ctx.font = `${fontSize}px Sans-Serif`;
+                    const textWidth = ctx.measureText(label).width;
+                    const bckgDimensions = [textWidth, fontSize].map(n => n + fontSize * 0.2); // some padding
+         
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+         
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    // let tempColor = (node.gender == 'm') ? '#0000ff' : (node.gender == 'f') ? '#FF7276' : '#000000';
+                    // ctx.fillStyle =tempColor;
+                    ctx.fillStyle = '#000000';
+                    ctx.fillText(label, node.x, node.y);
+         
+                    node.__bckgDimensions = bckgDimensions; // to re-use in nodePointerAreaPaint
+                    }}
+                    nodePointerAreaPaint={(node, color, ctx) => {
+                    ctx.fillStyle = color;
+                    const bckgDimensions = node.__bckgDimensions;
+                    bckgDimensions && ctx.fillRect(node.x - bckgDimensions[0] / 2, node.y - bckgDimensions[1] / 2, ...bckgDimensions);
+                    }}
+                    // onNodeClick={node => window.open("https://sxctrack.com/athlete/" + node.id, "_blank")}
+                /> -->
