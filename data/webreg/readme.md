@@ -19,6 +19,15 @@ which will create
 
 then run a python server under the /data/webreg directory to view 2d_webreg_rel.html for a 3d visualization of coures prerequisites
 
+using
+
+```python3 -m http.server 8000```
+
+or
+
+```python -m SimpleHTTPServer 8000```
+(but I have not tested this with python2)
+
 and under /data/webreg/prereq/prereqList.html
 
 you can search a more usable interface for course prerequisites
